@@ -1,0 +1,53 @@
+load("@npm//:defs.bzl", "npm_link_all_packages")
+load("@aspect_bazel_lib//lib:directory_path.bzl", "directory_path")
+load("@aspect_rules_js//js:defs.bzl", "js_binary")
+load("@aspect_rules_webpack//webpack:defs.bzl", "webpack_bundle")
+
+npm_link_all_packages(name = "node_modules")
+
+directory_path(
+    name = "entrypoint",
+    directory = "//:node_modules/webpack/dir",
+    path = "bin/webpack.js",
+)
+
+js_binary(
+    name = "webpack",
+    data = ["//:node_modules/webpack", "//:node_modules/webpack-dev-server", "//:node_modules/webpack-cli"],
+    entry_point = ":entrypoint",
+)
+
+webpack_bundle(
+    name = "normal",
+    entry_point = "index.js",
+    webpack_config = "webpack.config.js",
+)
+
+webpack_bundle(
+    name = "with_dep",
+    entry_point = "index.js",
+    webpack_config = "webpack.config.js",
+    deps = ["@webpack//:node_modules/webpack"],
+)
+
+webpack_bundle(
+    name = "with_local_dep",
+    entry_point = "index.js",
+    webpack_config = "webpack.config.js",
+    deps = [":node_modules/webpack"],
+)
+
+webpack_bundle(
+    name = "with_local_webpack",
+    entry_point = "index.js",
+    webpack_config = "webpack.config.js",
+    webpack = ":webpack",
+)
+
+webpack_bundle(
+    name = "with_local_webpack_and_dep",
+    entry_point = "index.js",
+    webpack_config = "webpack.config.js",
+    webpack = ":webpack",
+    deps = [":node_modules/webpack"],
+)
